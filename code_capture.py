@@ -8,8 +8,9 @@ class CodeCapture:
     key: str
     store = Bunch()
 
-    def __init__(self, key):
+    def __init__(self, key, trim_if_bool=True):
         self.key = key
+        self.trim_if_bool = trim_if_bool
 
     def __enter__(self):
         return self
@@ -23,6 +24,10 @@ class CodeCapture:
 
         for i in itertools.count(start=1):
             line = linecache.getline(filename, line_number + i)
+
+            if self.trim_if_bool and line.lstrip() in ("if False:\n", "if True:\n"):
+                continue
+
             line_indent = len(line) - len(line.lstrip())
 
             if indent is None:
