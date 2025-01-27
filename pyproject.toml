@@ -6,3 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["bunch-py3>=2.0.0"]
 authors = [{ name = "Peter Somhorst" }, { name = "Grayden Shand" }]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
