@@ -7,10 +7,10 @@ import itertools
 class CodeCapture:
     key: str
     store = Bunch()
+    run_skippable_code_blocks: bool = True
 
-    def __init__(self, key, trim_if_bool=True):
+    def __init__(self, key):
         self.key = key
-        self.trim_if_bool = trim_if_bool
 
     def __enter__(self):
         return self
@@ -25,7 +25,7 @@ class CodeCapture:
         for i in itertools.count(start=1):
             line = linecache.getline(filename, line_number + i)
 
-            if self.trim_if_bool and line.lstrip() in ("if False:\n", "if True:\n"):
+            if line.lstrip() == "if CodeCapture.run_skippable_code_blocks:\n":
                 continue
 
             line_indent = len(line) - len(line.lstrip())
