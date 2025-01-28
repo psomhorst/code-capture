@@ -16,3 +16,6 @@ only-include = ["src"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src" = ""
+
+[project.optional-dependencies]
+dev = ["pytest"]
