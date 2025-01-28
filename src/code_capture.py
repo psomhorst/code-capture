@@ -2,20 +2,39 @@ from bunch_py3 import Bunch
 import inspect
 import linecache
 import itertools
+from typing import Callable, Optional, Type
+from types import TracebackType
 
 
 class CodeCapture:
     key: str
     store = Bunch()
 
-    def __init__(self, key, trim_if_bool=True):
+    def __init__(
+            self,
+            key: str,
+            line_processor: Callable[[str], Optional[str]] = None
+    ) -> None:
+        """Create a new CodeCapture instance.
+        
+        Args:
+            key: The key to store the captured code under.
+            line_processor: An optional function that pre-processes each line of code
+                before storing it. The line_processor function can return None to
+                omit the line from the captured code.
+        """
         self.key = key
-        self.trim_if_bool = trim_if_bool
+        self.line_processor = line_processor
 
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]], 
+        exc_value: Optional[BaseException], 
+        traceback: Optional[TracebackType]
+    ) -> Optional[bool]:
         cf = inspect.currentframe().f_back
         filename = cf.f_code.co_filename
         line_number = cf.f_lineno
@@ -25,8 +44,10 @@ class CodeCapture:
         for i in itertools.count(start=1):
             line = linecache.getline(filename, line_number + i)
 
-            if self.trim_if_bool and line.lstrip() in ("if False:\n", "if True:\n"):
-                continue
+            if self.line_processor:
+                line = self.line_processor(line)
+                if line is None:
+                    continue
 
             line_indent = len(line) - len(line.lstrip())
 
